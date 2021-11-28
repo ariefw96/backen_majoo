@@ -56,7 +56,7 @@ Built with Node js, using ExpressJs framework and other libraries.
 
 1. Open your terminal or command prompt
 
-2. Type `git clone https://github.com/ariefw96/sagaratest.git`
+2. Type `git clone https://github.com/ariefw96/backen_majoo.git`
 
 3. Open the folder and type `npm install` for install dependencies
 
@@ -100,7 +100,7 @@ Customize each value with the one you are using.
 
 
 ### Product Router
-**Used for supplying data to home, history, and notification**
+**Used for supplying data to home**
 
 | No. | Method | Endpoint                             | Information                                                   |
 | --- | ------ | ------------------------------------ | ------------------------------------------------------------- |
