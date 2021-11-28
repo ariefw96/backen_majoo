@@ -5,6 +5,7 @@ const fs = require('fs');
 const pathlib = require('path');
 const directory = "./public/images";
 const moment = require('moment');
+const { Op } = require('sequelize')
 
 exports.add_product = async function (req, res) {
     const now = new Date();
@@ -16,12 +17,12 @@ exports.add_product = async function (req, res) {
                 const { path, size, name, type } = files.product_image;
             } catch (e) {
                 return res.status(400).json({
-                    status:400,
-                    message:'Field tidak boleh kosong!!'
-                
-                    
+                    status: 400,
+                    message: 'Field tidak boleh kosong!!'
                 })
             }
+            const { product_name, product_desc, product_price, product_category } = fields;
+            const { path, size, name, type } = files.product_image;
             const image_name = moment().unix();
             const extFile = pathlib.extname(name);
             const file_name = image_name + extFile;
@@ -152,6 +153,20 @@ exports.update_product = async function (req, res) {
             const form = new formidable.IncomingForm();
             form.parse(req, async (err, fields, files) => {
                 const { product_name, product_desc, product_price, product_category } = fields;
+                const isDuplicate = await productModel.findAll({
+                    where: {
+                        id: {
+                            [Op.not] :id
+                        },
+                        product_name
+                    }
+                })
+                if (isDuplicate.length > 0) {
+                    return res.status(400).json({
+                        status: 400,
+                        message: 'Duplikasi nama terdeteksi'
+                    })
+                }
                 if (files?.product_image) {
                     const { path, size, name, type } = files.product_image;
                     const image_name = moment().unix();
