@@ -11,11 +11,17 @@ exports.add_product = async function (req, res) {
     try {
         const form = new formidable.IncomingForm();
         form.parse(req, async (err, fields, files) => {
-            if(fields == null || files == null){
-                throw 'Request Cannot be Empty'
+            try {
+                const { product_name, product_desc, product_price, product_category } = fields;
+                const { path, size, name, type } = files.product_image;
+            } catch (e) {
+                return res.status(400).json({
+                    status:400,
+                    message:'Field tidak boleh kosong!!'
+                
+                    
+                })
             }
-            const { product_name, product_desc, product_price, product_category } = fields;
-            const { path, size, name, type } = files.product_image;
             const image_name = moment().unix();
             const extFile = pathlib.extname(name);
             const file_name = image_name + extFile;
@@ -33,6 +39,19 @@ exports.add_product = async function (req, res) {
                         }
                     }));
                 });
+
+            const isDuplicate = await productModel.findAll({
+                where: {
+                    product_name
+                }
+            })
+
+            if (isDuplicate.length > 0) {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Nama Produk tidak boleh sama'
+                })
+            }
             const dataProduct = {
                 product_name,
                 product_desc,
@@ -65,7 +84,7 @@ exports.all_product = async function (req, res) {
         page = 1;
     }
 
-    if(size == null){
+    if (size == null) {
         size = 5;
     }
 
@@ -75,9 +94,9 @@ exports.all_product = async function (req, res) {
     console.log(start, end);
 
     try {
-        let dataProduct = await productModel.findAll({order:[['updated_at','DESC']]} );
+        let dataProduct = await productModel.findAll({ order: [['updated_at', 'DESC']] });
 
-        let lastPage = (dataProduct.length%size) == 0 ? (dataProduct.length/size) : (Math.floor(dataProduct.length/size) + 1);
+        let lastPage = (dataProduct.length % size) == 0 ? (dataProduct.length / size) : (Math.floor(dataProduct.length / size) + 1);
         dataProduct = dataProduct.slice(start, end);
 
         res.status(200).json({
@@ -86,9 +105,9 @@ exports.all_product = async function (req, res) {
             data: dataProduct,
             page: {
                 prev: page == 1 ? null : parseInt(page) - 1,
-                now : parseInt(page),
-                next : page == lastPage ? null : parseInt(page) + 1,
-                last : lastPage
+                now: parseInt(page),
+                next: page == lastPage ? null : parseInt(page) + 1,
+                last: lastPage
             }
         });
     } catch (e) {
